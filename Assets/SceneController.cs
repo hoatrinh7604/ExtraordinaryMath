@@ -14,6 +14,16 @@ public class SceneController : MonoBehaviour
     {
         SceneManager.LoadScene("MainMenu");
     }
+    
+    public void LoadSettings()
+    {
+        SceneManager.LoadScene("Setting");
+    }
+    
+    public void LoadHighscore()
+    {
+        SceneManager.LoadScene("Highscore");
+    }
 
     public void Quit()
     {

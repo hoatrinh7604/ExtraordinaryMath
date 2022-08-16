@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +14,8 @@ public class HighScoreMenu : MonoBehaviour
     [SerializeField] GameObject content;
     [SerializeField] float height;
 
+    [SerializeField] DataSaveController dataSaveController;
+
     private void Start()
     {
         LoadData();
@@ -20,7 +24,7 @@ public class HighScoreMenu : MonoBehaviour
     public void LoadData()
     {
         ClearContent();
-        var data = JsonUtility.FromJson<HighScoreData>(highScoreData.text);
+        var data = JsonUtility.FromJson<HighScoreData>(dataSaveController.ReadFile());
 
         List<HighScoreInfo> infos = data.Items.OrderByDescending(a => a.score).ToList();
 

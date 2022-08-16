@@ -679,6 +679,7 @@ GameObject:
   m_Component:
   - component: {fileID: 771447218}
   - component: {fileID: 771447217}
+  - component: {fileID: 771447219}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -702,6 +703,7 @@ MonoBehaviour:
   highScorePrefab: {fileID: 1664217507527198230, guid: 7f80f2c47742a724793e86bb91e40b02, type: 3}
   content: {fileID: 1530163160}
   height: 50
+  dataSaveController: {fileID: 771447219}
 --- !u!4 &771447218
 Transform:
   m_ObjectHideFlags: 0
@@ -716,6 +718,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &771447219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771447216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40f625c5052497d46936c787359743e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1022456005
 GameObject:
   m_ObjectHideFlags: 0

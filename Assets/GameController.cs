@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,6 +26,7 @@ public class GameController : MonoBehaviour
 
     private float time;
     private float timeSystem;
+    private float timeGame;
     private int currentCal;
     private UIController uiController;
 
@@ -39,6 +41,8 @@ public class GameController : MonoBehaviour
         division = 3
     }
 
+    [SerializeField] DataSaveController dataSaveController;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -51,6 +55,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        timeGame += Time.deltaTime;
         timeSystem += Time.deltaTime;
         time -= Time.deltaTime;
 
@@ -74,12 +79,14 @@ public class GameController : MonoBehaviour
     {
         time = maxValueTime;
         timeSystem = 0;
+        timeGame = 0;
         currentLevel = 0;
         highScore = PlayerPrefs.GetInt("highscore");
         uiController.SetSlider(maxValueTime);
         uiController.UpdateSlider(maxValueTime);
         uiController.ShowGameOver(false);
         bothAnswerRight = false;
+        SetCalsBySetting();
     }
 
     public void UpdateLevel(int level)
@@ -98,25 +105,63 @@ public class GameController : MonoBehaviour
             PlayerPrefs.SetInt("highscore", highScore);
         }
 
-        int firstNum = Random.Range(1, 20);
-        int lastNum = Random.Range(1, 20);
-        SetCal(firstNum, lastNum);
+        int firstNum = UnityEngine.Random.Range(1, 20);
+        int lastNum = UnityEngine.Random.Range(1, 20);
+        while(!SetCal(firstNum, lastNum))
+        {
+            firstNum = UnityEngine.Random.Range(1, 20);
+            lastNum = UnityEngine.Random.Range(1, 20);
+        }
         UpdateLevelInfo(firstNum, lastNum);
         time = maxValueTime;
         bothAnswerRight = false;
     }
 
-    public void SetCal(int first, int last)
+    List<int> listCals = new List<int>();
+    public void SetCalsBySetting()
     {
-        int random = Random.Range(0, 4);
-        if(random==3 && first % last == 0) 
-            currentCal = (int)(Cal.division);
-        else if(random == 1 && first > last) 
-            currentCal = (int)(Cal.subtraction);
-        else if(random == 0)
+        listCals.Clear();
+        if (PlayerPrefs.GetInt("Summation") == 1)
+            listCals.Add((int)Cal.summation);
+        if (PlayerPrefs.GetInt("Subtraction") == 1)
+            listCals.Add((int)Cal.subtraction);
+        if (PlayerPrefs.GetInt("Multiplication") == 1)
+            listCals.Add((int)Cal.multiplication);
+        if (PlayerPrefs.GetInt("Division") == 1)
+            listCals.Add((int)Cal.division);
+
+        if (listCals.Count == 0)
+        {
+            listCals.Add(0);
+            listCals.Add(1);
+            listCals.Add(2);
+            listCals.Add(3);
+        }
+    }
+    public bool SetCal(int first, int last)
+    {
+        int random = listCals[UnityEngine.Random.Range(0, listCals.Count)];
+
+        if (random == 3)
+        {
+            if (first % last == 0)
+                currentCal = (int)(Cal.division);
+            else
+                return false;
+        }
+        else if (random == 1)
+        {
+            if(first > last)
+                currentCal = (int)(Cal.subtraction);
+            else
+                return false ;
+        }
+        else if (random == 0)
             currentCal = (int)(Cal.summation);
         else
             currentCal = (int)(Cal.multiplication);
+
+        return true;
 
     }
 
@@ -160,5 +205,21 @@ public class GameController : MonoBehaviour
     public void GameOver()
     {
         uiController.ShowGameOver(true);
+
+        SaveScore();
+    }
+
+    private void SaveScore()
+    {
+        var data = JsonUtility.FromJson<HighScoreData>(dataSaveController.ReadFile());
+        HighScoreInfo highScoreInfo = new HighScoreInfo();
+        highScoreInfo.name = PlayerPrefs.GetString("username");
+        highScoreInfo.score = currentLevel;
+        highScoreInfo.date = DateTime.UtcNow.ToString();
+        highScoreInfo.time = timeGame.ToString("0.00");
+
+        data.Items.Add(highScoreInfo);
+
+        dataSaveController.WriteFile(JsonUtility.ToJson(data));
     }
 }
