@@ -6,47 +6,74 @@ using TMPro;
 
 public class SettingController : MonoBehaviour
 {
-    [SerializeField] TMP_InputField minValue;
-    [SerializeField] TMP_InputField maxValue;
+    [SerializeField] Button[] listRanges;
 
     [SerializeField] SceneController sceneController;
 
     int min = 1;
-    int max = 100;
+    int max = 10;
 
     private void Start()
     {
-        LoadSetting();
-
-        minValue.onValueChanged.AddListener(delegate { OnMinValueChanged(); });
-        maxValue.onValueChanged.AddListener(delegate { OnMaxValueChanged(); });
-    }
-
-    public void OnMinValueChanged()
-    {
-        PlayerPrefs.SetInt("Min", int.Parse(minValue.text));
-    }
-    
-    public void OnMaxValueChanged()
-    {
-        PlayerPrefs.SetInt("Max", int.Parse(maxValue.text));
-    }
-
-    public void LoadSetting()
-    {
-        min = PlayerPrefs.GetInt("Min");
-        max = PlayerPrefs.GetInt("Max");
-
-        if(min == 0 && max == 0)
+        for(int i = 0; i < listRanges.Length; i++)
         {
-            min = 1;
-            max = 100;
-            PlayerPrefs.SetInt("Min", 1);
-            PlayerPrefs.SetInt("Max", 100);
+            int j = i;
+            listRanges[i].onClick.AddListener(delegate { SetRange(j); });
+        }
+        LoadSetting();
+    }
+
+    public void SetRange(int index)
+    {
+        for(int i = 0; i < listRanges.Length; i++)
+        {
+            listRanges[i].interactable = true;
+        }
+        listRanges[index].interactable = false;
+
+        switch(index)
+        {
+            case 0:
+                min = 1;
+                max = 10;
+                break;
+            case 1:
+                min = 1;
+                max = 100;
+                break;
+            case 2:
+                min = 1;
+                max = 1000;
+                break;
+            case 3:
+                min = 10;
+                max = 100;
+                break;
+            case 4:
+                min = 10;
+                max = 1000;
+                break;
+            case 5:
+                min = 100;
+                max = 1000;
+                break;
+            default:
+                index = 0;
+                min = 1;
+                max = 10;
+                break;
         }
 
-        minValue.text = min.ToString();
-        maxValue.text = max.ToString();
+        PlayerPrefs.SetInt("Min", min);
+        PlayerPrefs.SetInt("Max", max);
+        PlayerPrefs.SetInt("RangeIndex", index);
+    }
+
+    int currentIndex = 0;
+    public void LoadSetting()
+    {
+        currentIndex = PlayerPrefs.GetInt("RangeIndex");
+        SetRange(currentIndex);
     }
 
     public void BackToMenu()

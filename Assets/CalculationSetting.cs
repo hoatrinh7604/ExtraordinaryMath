@@ -31,6 +31,20 @@ public class CalculationSetting : MonoBehaviour
     public void SwitchModeButton(int id)
     {
         calculationEnable[id] = !calculationEnable[id];
+        if(CountMath() == 0)
+            calculationEnable[id] = !calculationEnable[id];
+    }
+
+    public int CountMath()
+    {
+        int count = 0;
+        for(int i = 0; i < calculationEnable.Length; i++)
+        {
+            if (calculationEnable[i])
+                count++;
+        }
+
+        return count;
     }
 
     public void LoadSetting()

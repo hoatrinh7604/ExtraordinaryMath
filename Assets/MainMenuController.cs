@@ -6,10 +6,16 @@ using UnityEngine;
 public class MainMenuController : MonoBehaviour
 {
     [SerializeField] DataSaveController dataSaveController;
+
+    private void Start()
+    {
+        Time.timeScale = 1;
+    }
+
     public void ResetData()
     {
         PlayerPrefs.SetInt("Min", 0);
-        PlayerPrefs.SetInt("Max", 0);
+        PlayerPrefs.SetInt("Max", 20);
 
         PlayerPrefs.SetInt("Summation", 1);
         PlayerPrefs.SetInt("Subtraction", 1);

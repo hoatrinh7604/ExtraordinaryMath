@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -42,7 +44,7 @@ public class GameController : MonoBehaviour
     }
 
     [SerializeField] DataSaveController dataSaveController;
-
+    [SerializeField] LevelDisplayController levelDisplayController;
     // Start is called before the first frame update
     void Start()
     {
@@ -63,16 +65,35 @@ public class GameController : MonoBehaviour
 
         if(time < 0)
         {
+            time = 10000;
             // GameOver
-            GameOver();
+            UserWrong();
         }
 
-        if(timeSystem > 30)
+        if(timeSystem > 10)
         {
-            maxValueTime--;
-            if (maxValueTime < 2) maxValueTime = 2;
-            timeSystem = 0;
+            UpLevel();
         }
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            SoundController.Instance.PlayAudio(SoundController.Instance.firing, 0.5f, false);
+        }
+    }
+
+    int level = 0;
+    public void UpLevel()
+    {
+        level++;
+        levelDisplayController.ChangeBG();
+        maxValueTime -= 0.5f;
+        if (maxValueTime < 1f) maxValueTime = 1f;
+        timeSystem = 0;
+    }
+
+    public int GetCurrentLevel()
+    {
+        return level;
     }
 
     public void Reset()
@@ -87,6 +108,18 @@ public class GameController : MonoBehaviour
         uiController.ShowGameOver(false);
         bothAnswerRight = false;
         SetCalsBySetting();
+        min = PlayerPrefs.GetInt("Min");
+        max = PlayerPrefs.GetInt("Max");
+        Time.timeScale = 1;
+        if(max == 0)
+        {
+            max = 10;
+            PlayerPrefs.SetInt("Max", 10);
+        }
+
+        SoundController.Instance.PlayAudio(SoundController.Instance.bg, 0.2f, true);
+
+        adsPopup.SetActive(false);
     }
 
     public void UpdateLevel(int level)
@@ -94,6 +127,8 @@ public class GameController : MonoBehaviour
         GetComponent<UIController>().UpdateLevel(level);
     }
 
+    int min = 1;
+    int max = 10;
     public void StartNextLevel()
     {
         currentLevel++;
@@ -105,12 +140,12 @@ public class GameController : MonoBehaviour
             PlayerPrefs.SetInt("highscore", highScore);
         }
 
-        int firstNum = UnityEngine.Random.Range(1, 20);
-        int lastNum = UnityEngine.Random.Range(1, 20);
+        int firstNum = UnityEngine.Random.Range(min, max + 1);
+        int lastNum = UnityEngine.Random.Range(min, max + 1);
         while(!SetCal(firstNum, lastNum))
         {
-            firstNum = UnityEngine.Random.Range(1, 20);
-            lastNum = UnityEngine.Random.Range(1, 20);
+            firstNum = UnityEngine.Random.Range(min, max + 1);
+            lastNum = UnityEngine.Random.Range(min, max + 1);
         }
         UpdateLevelInfo(firstNum, lastNum);
         time = maxValueTime;
@@ -144,6 +179,7 @@ public class GameController : MonoBehaviour
 
         if (random == 3)
         {
+            if(last == 0) return false;
             if (first % last == 0)
                 currentCal = (int)(Cal.division);
             else
@@ -193,7 +229,7 @@ public class GameController : MonoBehaviour
         else
         {
             //Game over
-            GameOver();
+            UserWrong();
         }
     }
 
@@ -202,23 +238,79 @@ public class GameController : MonoBehaviour
         uiController.UpdateSlider(value);
     }
 
+    public void PauseGame(bool isPause)
+    {
+        if(isPause)
+        {
+            Time.timeScale = 0;
+        }
+        else
+        {
+            Time.timeScale = 1;
+        }
+    }
+
+    [SerializeField] GameObject adsPopup;
+    public void ShowAdsPopupToGainMoreLife()
+    {
+        Time.timeScale = 0;
+        adsPopup.SetActive(true);
+    }
+
+    public void AdsCompleted()
+    {
+        Time.timeScale = 1;
+        StartNextLevel();
+    }
+
+    private void UserWrong()
+    {
+        Time.timeScale = 0;
+        SoundController.Instance.PlayAudio(SoundController.Instance.gameOver, 0.3f, false);
+        ShowAdsPopupToGainMoreLife();
+    }
+
     public void GameOver()
     {
         uiController.ShowGameOver(true);
 
-        SaveScore();
+        if(currentLevel > 0)
+            SaveScore();
     }
 
     private void SaveScore()
     {
-        var data = JsonUtility.FromJson<HighScoreData>(dataSaveController.ReadFile());
+        var dataLocal = dataSaveController.ReadFile();
+        var data = new HighScoreData();
+        if(dataLocal != "")
+            data = JsonUtility.FromJson<HighScoreData>(dataLocal);
+
         HighScoreInfo highScoreInfo = new HighScoreInfo();
         highScoreInfo.name = PlayerPrefs.GetString("username");
         highScoreInfo.score = currentLevel;
         highScoreInfo.date = DateTime.UtcNow.ToString();
         highScoreInfo.time = timeGame.ToString("0.00");
 
+        if(data.Items == null)
+        {
+            data.Items = new List<HighScoreInfo>();
+        }
         data.Items.Add(highScoreInfo);
+
+        // Only save ~200
+        if(data.Items.Count > 200)
+        {
+            List<HighScoreInfo> infos = data.Items.OrderByDescending(a => a.score).ToList();
+
+            List<HighScoreInfo> newList = new List<HighScoreInfo>();
+            data.Items.Clear();
+            for(int i = 0; i < infos.Count; i++)
+            {
+                if (i > 199) break;
+                newList.Add(infos[i]);
+            }
+            data.Items = newList; 
+        }
 
         dataSaveController.WriteFile(JsonUtility.ToJson(data));
     }

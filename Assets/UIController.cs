@@ -35,11 +35,11 @@ public class UIController : MonoBehaviour
             int random2 = Random.Range(0, 2);
             if(random2 == 0)
             {
-                result[1 - random] = result[random] + Random.Range(1, 10);
+                result[1 - random] = result[random] + GetRandom();
             }
             else
             {
-                result[1 - random] = Mathf.Abs(result[random] - Random.Range(1, 10));
+                result[1 - random] = Mathf.Abs(result[random] - GetRandom());
             }
 
             bool both = result[random] == result[1 - random];
@@ -54,11 +54,11 @@ public class UIController : MonoBehaviour
             int random2 = Random.Range(0, 2);
             if (random2 == 0)
             {
-                result[1 - random] = result[random] + Random.Range(1, 10);
+                result[1 - random] = result[random] + GetRandom();
             }
             else
             {
-                result[1 - random] = Mathf.Abs(result[random] - Random.Range(1, 10));
+                result[1 - random] = Mathf.Abs(result[random] - GetRandom());
             }
 
             bool both = result[random] == result[1 - random];
@@ -72,11 +72,11 @@ public class UIController : MonoBehaviour
             int random2 = Random.Range(0, 2);
             if (random2 == 0)
             {
-                result[1 - random] = result[random] + Random.Range(1, 10);
+                result[1 - random] = result[random] + GetRandom();
             }
             else
             {
-                result[1 - random] = Mathf.Abs(result[random] - Random.Range(1, 10));
+                result[1 - random] = Mathf.Abs(result[random] - GetRandom());
             }
 
             bool both = result[random] == result[1 - random];
@@ -90,11 +90,11 @@ public class UIController : MonoBehaviour
             int random2 = Random.Range(0, 2);
             if (random2 == 0)
             {
-                result[1 - random] = result[random] + Random.Range(1, 10);
+                result[1 - random] = result[random] + GetRandom();
             }
             else
             {
-                result[1 - random] = Mathf.Abs(result[random] - Random.Range(1, 10));
+                result[1 - random] = Mathf.Abs(result[random] - GetRandom());
             }
 
             bool both = result[random] == result[1 - random];
@@ -103,6 +103,17 @@ public class UIController : MonoBehaviour
 
         leftButton.GetComponentInChildren<TextMeshProUGUI>().text = result[0].ToString();
         rightButton.GetComponentInChildren<TextMeshProUGUI>().text = result[1].ToString();
+    }
+
+    public int GetRandom()
+    {
+        int tile = Random.Range(1, 10);
+        if(tile < GameController.Instance.GetCurrentLevel())
+        {
+            return tile*10;
+        }
+
+        return tile * Random.Range(1,6);
     }
 
     public void SetSlider(float value)

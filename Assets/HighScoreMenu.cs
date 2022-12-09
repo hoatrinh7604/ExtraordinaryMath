@@ -8,7 +8,6 @@ using System.Linq;
 
 public class HighScoreMenu : MonoBehaviour
 {
-    [SerializeField] TextAsset highScoreData;
     [SerializeField] GameObject highScorePrefab;
 
     [SerializeField] GameObject content;
@@ -24,8 +23,9 @@ public class HighScoreMenu : MonoBehaviour
     public void LoadData()
     {
         ClearContent();
-        var data = JsonUtility.FromJson<HighScoreData>(dataSaveController.ReadFile());
-
+        string dataLocal = dataSaveController.ReadFile();
+        if (dataLocal == "") return;
+        var data = JsonUtility.FromJson<HighScoreData>(dataLocal);
         List<HighScoreInfo> infos = data.Items.OrderByDescending(a => a.score).ToList();
 
         for(int i = 0; i < infos.Count; i++)

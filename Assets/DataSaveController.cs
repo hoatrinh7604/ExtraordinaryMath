@@ -5,21 +5,25 @@ using UnityEngine;
 
 public class DataSaveController : MonoBehaviour
 {
-    string saveFile = "";
-
-    private void Awake()
-    {
-        saveFile = Application.streamingAssetsPath + "/Data.json";
-    }
+    string saveFile = "/Data.json";
 
     public string ReadFile()
     {
-        var result = File.ReadAllText(saveFile);
-        return result;
+        string data = "";
+        if (File.Exists(Application.persistentDataPath + saveFile))
+        {
+            StreamReader reader = new StreamReader(Application.persistentDataPath + saveFile);
+            data = reader.ReadToEnd();
+            reader.Close();
+        }
+        return data;
     }
 
     public void WriteFile(string jsonString)
     {
-        File.WriteAllText(saveFile, jsonString);
+        StreamWriter writer = new StreamWriter(Application.persistentDataPath + saveFile);
+        writer.Write(jsonString); //Creates editable data in form of a string.
+        writer.Close();
     }
+
 }
